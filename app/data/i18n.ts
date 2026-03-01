@@ -39,6 +39,8 @@ const zh: StringMap = {
   "calendar.completed": "已完成",
   "calendar.add_event": "添加日程",
   "calendar.today": "今天",
+  "calendar.day_summary": "{pending} 待完成 · {done} 已完成",
+  "calendar.add_short": "+ 添加",
 
   // Stats Screen
   "stats.title": "统计",
@@ -243,6 +245,8 @@ const en: StringMap = {
   "calendar.completed": "COMPLETED",
   "calendar.add_event": "Add Event",
   "calendar.today": "Today",
+  "calendar.day_summary": "{pending} pending · {done} done",
+  "calendar.add_short": "+ Add",
 
   // Stats Screen
   "stats.title": "Statistics",

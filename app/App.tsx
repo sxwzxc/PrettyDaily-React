@@ -168,6 +168,11 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const hasImage = !!bgDataUrl
   const useTransparency = windowTransparency && !hasImage
 
+  // Sync data-transparency attribute on <html> so CSS can target it
+  useEffect(() => {
+    document.documentElement.dataset.transparency = useTransparency ? "true" : "false"
+  }, [useTransparency])
+
   return (
     <div
       style={{

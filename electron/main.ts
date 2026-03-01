@@ -16,6 +16,7 @@ function createWindow() {
     titleBarStyle: "hiddenInset",
     vibrancy: "under-window",
     visualEffectState: "followWindow",
+    transparent: true,
     backgroundColor: "#00000000",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
