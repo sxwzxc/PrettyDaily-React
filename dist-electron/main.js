@@ -47,6 +47,7 @@ function createWindow() {
 }
 // App lifecycle
 electron_1.app.whenReady().then(() => {
+    electron_1.Menu.setApplicationMenu(null);
     createWindow();
     electron_1.app.on("activate", () => {
         if (electron_1.BrowserWindow.getAllWindows().length === 0)
