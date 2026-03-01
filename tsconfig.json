@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["DOM", "DOM.Iterable", "ES6"],
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -10,20 +10,17 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": false,
-    "declaration": true,
-    "declarationMap": true,
-    "outDir": "dist",
-    "jsx": "react-jsx"
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@liquid/*": ["src/*"],
+      "@app/*": ["app/*"]
+    }
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src", "app"],
+  "exclude": ["node_modules", "dist", "dist-electron", "dist-lib", "release", "electron"]
 }
