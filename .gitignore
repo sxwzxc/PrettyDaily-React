@@ -178,3 +178,28 @@ dist/
 .DS_Store
 
 liquid-glass-example/src/components
+
+# Electron / build artifacts
+# release output from electron-builder
+release/
+dist-electron/
+
+# Common installer/artifact file types
+*.exe
+*.msi
+*.AppImage
+*.deb
+*.rpm
+*.dmg
+*.zip
+
+# code signing / keystore files (sensitive)
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# local env and secrets
+.env.*.local
+.secret
+

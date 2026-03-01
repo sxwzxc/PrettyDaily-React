@@ -1,114 +1,98 @@
-# Liquid Glass React
+# PrettyDaily-React（桌面版）
 
-Apple's Liquid Glass effect for React.
+`PrettyDaily-React` 是基于 **Electron + React + TypeScript** 的跨平台桌面应用，
+目标是与 `PrettyDaily`（Android 版）在日程/待办核心能力上保持功能对等。
 
-Card Example              |  Button Example
-:-------------------------:|:-------------------------:
-![](https://github.com/rdev/liquid-glass-react/raw/master/assets/card.png)  |  ![](https://github.com/rdev/liquid-glass-react/raw/master/assets/button.png)
+## 功能概览
 
-## 🎬  Demo
+- 今日视图（日程 + 待办）
+- 月历视图（按天查看事件、快速新增）
+- 待办管理（优先级、截止日期、完成状态）
+- 统计页面（周/月完成情况）
+- 设置中心（语言、主题、玻璃效果、数据管理、账号同步）
+- 本地持久化（Electron IPC / localStorage 回退）
 
-[Click here](https://liquid-glass.maxrovensky.com) to see it in action!
+## 技术栈
 
-![project liquid gif](./assets/project-liquid.gif)
+- Electron 33
+- React 18
+- TypeScript 5
+- Vite 5
+- electron-builder 25
 
-## ✨ Features
+## 本地开发
 
-- Proper edgy bending and refraction
-- Multiple refraction modes
-- Configurable frosty level
-- Supports arbitrary child elements
-- Configurable paddings
-- Correct hover and click effects
-- Edges and highlights take on the underlying light like Apple's does
-- Configurable chromatic aberration
-- Configurable elasticity, to mimic Apple's "liquid" feel
-
-> **⚠️ NOTE:** Safari and Firefox only partially support the effect (displacement will not be visible)
-
-## 🚀 Usage
-
-### Installation
+### 1) 安装依赖
 
 ```bash
-npm install liquid-glass-react
+npm install
 ```
 
-### Basic Usage
+### 2) 启动开发模式
 
-```tsx
-import LiquidGlass from 'liquid-glass-react'
-
-function App() {
-  return (
-    <LiquidGlass>
-      <div className="p-6">
-        <h2>Your content here</h2>
-        <p>This will have the liquid glass effect</p>
-      </div>
-    </LiquidGlass>
-  )
-}
+```bash
+npm run dev:electron
 ```
 
-### Button Example
+## 打包命令
 
-```tsx
-<LiquidGlass
-  displacementScale={64}
-  blurAmount={0.1}
-  saturation={130}
-  aberrationIntensity={2}
-  elasticity={0.35}
-  cornerRadius={100}
-  padding="8px 16px"
-  onClick={() => console.log('Button clicked!')}
->
-  <span className="text-white font-medium">Click Me</span>
-</LiquidGlass>
+```bash
+npm run dist:win
+npm run dist:mac
+npm run dist:linux
 ```
 
-### Mouse Container Example
+> 说明：打包命令已显式使用 `--publish never`，仅构建产物，不会在构建阶段尝试发布到 GitHub Release。
 
-When you want the glass effect to respond to mouse movement over a larger area (like a parent container), use the `mouseContainer` prop:
+## CI/CD（GitHub Actions）
 
-```tsx
-function App() {
-  const containerRef = useRef<HTMLDivElement>(null)
+工作流文件：`.github/workflows/build.yml`
 
-  return (
-    <div ref={containerRef} className="w-full h-screen bg-image">
-      <LiquidGlass
-        mouseContainer={containerRef}
-        elasticity={0.3}
-        style={{ position: 'fixed', top: '50%', left: '50%' }}
-      >
-        <div className="p-6">
-          <h2>Glass responds to mouse anywhere in the container</h2>
-        </div>
-      </LiquidGlass>
-    </div>
-  )
-}
-```
+- Push 到 `master/main`：自动构建三平台产物并上传为 artifacts
+- Push `v*` 标签：在构建成功后自动创建 GitHub Release 并上传产物
 
-## Props
+### 你需要在 GitHub 中准备什么？
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `children` | `React.ReactNode` | - | The content to render inside the glass container |
-| `displacementScale` | `number` | `70` | Controls the intensity of the displacement effect |
-| `blurAmount` | `number` | `0.0625` | Controls the blur/frosting level |
-| `saturation` | `number` | `140` | Controls color saturation of the glass effect |
-| `aberrationIntensity` | `number` | `2` | Controls chromatic aberration intensity |
-| `elasticity` | `number` | `0.15` | Controls the "liquid" elastic feel (0 = rigid, higher = more elastic) |
-| `cornerRadius` | `number` | `999` | Border radius in pixels |
-| `className` | `string` | `""` | Additional CSS classes |
-| `padding` | `string` | - | CSS padding value |
-| `style` | `React.CSSProperties` | - | Additional inline styles |
-| `overLight` | `boolean` | `false` | Whether the glass is over a light background |
-| `onClick` | `() => void` | - | Click handler |
-| `mouseContainer` | `React.RefObject<HTMLElement \| null> \| null` | `null` | Container element to track mouse movement on (defaults to the glass component itself) |
-| `mode` | `"standard" \| "polar" \| "prominent" \| "shader"` | `"standard"` | Refraction mode for different visual effects. `shader` is the most accurate but not the most stable. |
-| `globalMousePos` | `{ x: number; y: number }` | - | Global mouse position coordinates for manual control |
-| `mouseOffset` | `{ x: number; y: number }` | - | Mouse position offset for fine-tuning positioning |
+#### 必需
+
+- 通常 **不需要额外提供 PAT**。当前工作流使用 `secrets.GITHUB_TOKEN` 发布 Release。
+
+#### 可选（代码签名相关）
+
+如果你要做“可信签名”（避免 Windows/macOS 未签名警告），需要配置证书 Secrets：
+
+- Windows 签名（可选）
+  - `CSC_LINK`：Base64 或 URL 形式的 `.p12/.pfx` 证书
+  - `CSC_KEY_PASSWORD`：证书密码
+
+- macOS 签名与公证（可选）
+  - `APPLE_ID`
+  - `APPLE_APP_SPECIFIC_PASSWORD`
+  - `APPLE_TEAM_ID`
+  - 以及对应开发者证书（同样可通过 `CSC_LINK` / `CSC_KEY_PASSWORD`）
+
+> 未配置签名证书时，`electron-builder` 会提示 “no signing info identified, signing is skipped”，这是正常现象，不会导致构建失败。
+
+## 为什么之前会失败？
+
+你的日志报错：
+
+- `GitHub Personal Access Token is not set ... GH_TOKEN`
+
+根因是 `electron-builder` 在 CI 某些场景（尤其 tag 构建）会尝试自动发布，从而要求 `GH_TOKEN`。
+
+本仓库已修复为：
+
+- 打包阶段仅构建（`--publish never`）
+- 发布阶段交给独立 Release Job（使用 `GITHUB_TOKEN`）
+
+## 目录结构（核心）
+
+- `app/`：React 渲染进程
+- `electron/`：Electron 主进程与预加载脚本
+- `.github/workflows/build.yml`：CI/CD
+- `release/`：本地产物输出目录
+
+## 许可证
+
+MIT
