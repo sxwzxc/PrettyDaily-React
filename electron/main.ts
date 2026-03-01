@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, nativeTheme, shell } from "electron"
+import { app, BrowserWindow, dialog, ipcMain, nativeTheme, shell, Menu } from "electron"
 import path from "path"
 import fs from "fs"
 
@@ -49,6 +49,7 @@ function createWindow() {
 
 // App lifecycle
 app.whenReady().then(() => {
+  Menu.setApplicationMenu(null)
   createWindow()
 
   app.on("activate", () => {

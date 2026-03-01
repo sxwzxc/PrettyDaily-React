@@ -331,19 +331,17 @@ function DayDetailDialog({ dateStr, events, lang, onClose, onAdd, onEdit, onTogg
       style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div style={{
-        width: "min(480px, 92vw)",
-        maxHeight: "72vh",
-        background: "rgba(16,16,26,0.88)",
-        border: "1px solid rgba(255,255,255,0.12)",
-        borderRadius: 24,
-        boxShadow: "0 28px 72px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.08)",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
-      }}>
+      <GlassCard
+        blurRadius={24}
+        style={{
+          width: "min(480px, 92vw)",
+          maxHeight: "72vh",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          borderRadius: 24,
+        }}
+      >
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 14px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
           <div>
@@ -393,7 +391,7 @@ function DayDetailDialog({ dateStr, events, lang, onClose, onAdd, onEdit, onTogg
             ))
           )}
         </div>
-      </div>
+      </GlassCard>
     </div>
   )
 }
@@ -406,17 +404,17 @@ function YearMonthPickerDialog({ year, month, lang, monthsShort, onYearChange, o
 }) {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)" }}>
-      <div style={{
-        width: "min(360px, 88vw)",
-        background: "rgba(18,18,28,0.95)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        borderRadius: 24,
-        boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
-        padding: 20,
-        display: "flex",
-        flexDirection: "column",
-        gap: 16,
-      }}>
+      <GlassCard
+        blurRadius={24}
+        style={{
+          width: "min(360px, 88vw)",
+          padding: 20,
+          borderRadius: 24,
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+        }}
+      >
         {/* Year row */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <button onClick={() => onYearChange(year - 1)} style={{ background: "rgba(255,255,255,0.06)", border: "none", borderRadius: 10, width: 36, height: 36, cursor: "pointer", color: "rgba(255,255,255,0.7)", fontSize: 20 }}>‹</button>
@@ -453,7 +451,7 @@ function YearMonthPickerDialog({ year, month, lang, monthsShort, onYearChange, o
             {t("common.confirm", lang)}
           </button>
         </div>
-      </div>
+      </GlassCard>
     </div>
   )
 }
@@ -473,72 +471,69 @@ function CalendarEventCard({ item, lang, onEdit, onToggle }: {
   const priorityColor = item.priority === 1 ? "#34C759" : item.priority === 2 ? "#FF9500" : "#FF3B30"
 
   return (
-    <div
+    <GlassCard
       onClick={onEdit}
-      style={{
-        display: "flex",
-        alignItems: "stretch",
-        gap: 10,
-        background: "rgba(255,255,255,0.05)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        borderRadius: 16,
-        padding: "11px 12px",
-        cursor: "pointer",
-        transition: "background 0.15s",
-      }}
-      onMouseEnter={(e) => ((e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.09)")}
-      onMouseLeave={(e) => ((e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.05)")}
+      accentColor={item.colorArgb}
+      style={{ padding: "11px 12px" }}
     >
-      {/* Color bar */}
-      <div style={{ width: 3, borderRadius: 2, background: accentColor, flexShrink: 0 }} />
-
-      {/* Checkbox */}
       <div
-        onClick={(e) => { e.stopPropagation(); onToggle() }}
         style={{
-          width: 20, height: 20, borderRadius: 5, flexShrink: 0, alignSelf: "center", cursor: "pointer",
-          background: item.isCompleted ? "#34C759" : "transparent",
-          border: item.isCompleted ? "none" : `1.5px solid ${accentColor}60`,
-          display: "flex", alignItems: "center", justifyContent: "center",
+          display: "flex",
+          alignItems: "stretch",
+          gap: 10,
         }}
       >
-        {item.isCompleted && <span style={{ color: "#fff", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>✓</span>}
-      </div>
+        {/* Color bar */}
+        <div style={{ width: 3, borderRadius: 2, background: accentColor, flexShrink: 0 }} />
 
-      {/* Content */}
-      <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-          <span style={{
-            fontSize: 14, fontWeight: 600,
-            color: item.isCompleted ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)",
-            textDecoration: item.isCompleted ? "line-through" : "none",
-            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1,
-          }}>
-            {item.title}
-          </span>
-          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", flexShrink: 0, textDecoration: item.isCompleted ? "line-through" : "none" }}>{timeStr}</span>
+        {/* Checkbox */}
+        <div
+          onClick={(e) => { e.stopPropagation(); onToggle() }}
+          style={{
+            width: 20, height: 20, borderRadius: 5, flexShrink: 0, alignSelf: "center", cursor: "pointer",
+            background: item.isCompleted ? "#34C759" : "transparent",
+            border: item.isCompleted ? "none" : `1.5px solid ${accentColor}60`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >
+          {item.isCompleted && <span style={{ color: "#fff", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>✓</span>}
         </div>
-        {item.description ? (
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.42)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {item.description}
-          </span>
-        ) : null}
-        {/* Badges */}
-        {(item.priority > 0 || item.recurrenceRule || item.reminderMinutesBefore != null) && (
-          <div style={{ display: "flex", gap: 5, marginTop: 1, flexWrap: "wrap" }}>
-            {priorityLabel && (
-              <span style={{ fontSize: 10, color: priorityColor, fontWeight: 700 }}>{priorityLabel}</span>
-            )}
-            {item.reminderMinutesBefore != null && (
-              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>🔔</span>
-            )}
-            {item.recurrenceRule && (
-              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>🔁</span>
-            )}
+
+        {/* Content */}
+        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+            <span style={{
+              fontSize: 14, fontWeight: 600,
+              color: item.isCompleted ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.9)",
+              textDecoration: item.isCompleted ? "line-through" : "none",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1,
+            }}>
+              {item.title}
+            </span>
+            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", flexShrink: 0, textDecoration: item.isCompleted ? "line-through" : "none" }}>{timeStr}</span>
           </div>
-        )}
+          {item.description ? (
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.42)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {item.description}
+            </span>
+          ) : null}
+          {/* Badges */}
+          {(item.priority > 0 || item.recurrenceRule || item.reminderMinutesBefore != null) && (
+            <div style={{ display: "flex", gap: 5, marginTop: 1, flexWrap: "wrap" }}>
+              {priorityLabel && (
+                <span style={{ fontSize: 10, color: priorityColor, fontWeight: 700 }}>{priorityLabel}</span>
+              )}
+              {item.reminderMinutesBefore != null && (
+                <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>🔔</span>
+              )}
+              {item.recurrenceRule && (
+                <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>🔁</span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </GlassCard>
   )
 }
 
