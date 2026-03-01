@@ -123,3 +123,51 @@ electron_1.ipcMain.handle("show-notification", (_event, title, body) => {
 electron_1.nativeTheme.on("updated", () => {
     mainWindow?.webContents.send("theme-changed", electron_1.nativeTheme.shouldUseDarkColors ? "dark" : "light");
 });
+// IPC: Pick background image via native file dialog
+electron_1.ipcMain.handle("pick-image", async () => {
+    if (!mainWindow)
+        return null;
+    const { canceled, filePaths } = await electron_1.dialog.showOpenDialog(mainWindow, {
+        title: "选择背景图片",
+        buttonLabel: "使用此图片",
+        filters: [{ name: "图片", extensions: ["jpg", "jpeg", "png", "gif", "webp", "bmp"] }],
+        properties: ["openFile"],
+    });
+    return canceled ? null : filePaths[0];
+});
+// IPC: Read image file and return as base64 data URL
+electron_1.ipcMain.handle("get-image-data-url", (_event, filePath) => {
+    try {
+        if (!filePath || !fs_1.default.existsSync(filePath))
+            return null;
+        const ext = filePath.split(".").pop()?.toLowerCase() ?? "jpg";
+        const mimeMap = {
+            jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png",
+            gif: "image/gif", webp: "image/webp", bmp: "image/bmp",
+        };
+        const mime = mimeMap[ext] ?? "image/jpeg";
+        const data = fs_1.default.readFileSync(filePath);
+        return `data:${mime};base64,${data.toString("base64")}`;
+    }
+    catch {
+        return null;
+    }
+});
+// IPC: Enable/disable native window transparency (Acrylic on Win11, Vibrancy on macOS)
+electron_1.ipcMain.handle("set-window-effect", (_event, enabled) => {
+    if (!mainWindow)
+        return;
+    if (process.platform === "win32") {
+        // setBackgroundMaterial available since Electron 25, requires Windows 11
+        if (typeof mainWindow.setBackgroundMaterial === "function") {
+            ;
+            mainWindow.setBackgroundMaterial(enabled ? "acrylic" : "none");
+        }
+    }
+    else if (process.platform === "darwin") {
+        const vibrancyType = enabled ? "under-window" : null;
+        mainWindow.setVibrancy(vibrancyType);
+    }
+});
+// IPC: Return current OS platform
+electron_1.ipcMain.handle("get-platform", () => process.platform);

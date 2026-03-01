@@ -176,6 +176,23 @@ const zh: StringMap = {
   "settings.completion_sound": "完成音效",
   "settings.completion_sound_desc": "打钩时播放音效",
 
+  // Appearance (Background & Window)
+  "settings.appearance": "背景与窗口",
+  "settings.appearance_desc": "自定义背景图片与窗口透明效果",
+  "settings.bg_image": "背景图片",
+  "settings.bg_image_desc": "设置应用窗口的自定义背景",
+  "settings.bg_pick": "选择图片",
+  "settings.bg_clear": "清除图片",
+  "settings.bg_opacity": "图片不透明度",
+  "settings.window_effect": "窗口穿透效果",
+  "settings.window_effect_desc": "开启后窗口背景可看见桌面模糊内容",
+  "settings.window_overlay": "叠层深度",
+  "settings.window_overlay_desc": "穿透模式下的深色遮罩强度",
+  "settings.window_effect_win": "当前平台：Windows，Acrylic 亚克力模糊（需 Win 11）",
+  "settings.window_effect_mac": "当前平台：macOS，Vibrancy 自然模糊效果",
+  "settings.window_effect_other": "当前平台不支持原生穿透效果",
+  "settings.bg_no_image": "未设置背景图片",
+
   // Common
   "common.confirm": "确定",
   "common.cancel": "取消",
@@ -362,6 +379,23 @@ const en: StringMap = {
   "settings.completion_animation_desc": "Show animation when checking off items",
   "settings.completion_sound": "Completion Sound",
   "settings.completion_sound_desc": "Play sound when checking off items",
+
+  // Appearance (Background & Window)
+  "settings.appearance": "Background & Window",
+  "settings.appearance_desc": "Custom background image and window transparency",
+  "settings.bg_image": "Background Image",
+  "settings.bg_image_desc": "Set a custom wallpaper for the app window",
+  "settings.bg_pick": "Choose Image",
+  "settings.bg_clear": "Clear Image",
+  "settings.bg_opacity": "Image Opacity",
+  "settings.window_effect": "Window Transparency",
+  "settings.window_effect_desc": "Show blurred desktop content through the window",
+  "settings.window_overlay": "Overlay Darkness",
+  "settings.window_overlay_desc": "Dark overlay intensity in transparent mode",
+  "settings.window_effect_win": "Platform: Windows — Acrylic blur (requires Win 11)",
+  "settings.window_effect_mac": "Platform: macOS — Vibrancy natural blur",
+  "settings.window_effect_other": "Native transparency is not supported on this platform",
+  "settings.bg_no_image": "No background image set",
 
   // Common
   "common.confirm": "OK",

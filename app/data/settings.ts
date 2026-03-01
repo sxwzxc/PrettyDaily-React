@@ -16,6 +16,12 @@ export interface AppSettings {
   showCompletedInCalendar: boolean
   completionAnimationEnabled: boolean
   completionSoundEnabled: boolean
+
+  // Background & Window
+  backgroundImagePath: string      // absolute path, "" = none
+  backgroundImageOpacity: number   // 0.0–1.0, default 0.85
+  windowTransparency: boolean      // enable Acrylic (Win) / Vibrancy (Mac)
+  windowTransparencyOverlay: number // dark overlay 0.0–0.7, default 0.35
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -31,6 +37,11 @@ export const DEFAULT_SETTINGS: AppSettings = {
   showCompletedInCalendar: true,
   completionAnimationEnabled: true,
   completionSoundEnabled: true,
+
+  backgroundImagePath: "",
+  backgroundImageOpacity: 0.85,
+  windowTransparency: false,
+  windowTransparencyOverlay: 0.35,
 }
 
 export interface AccountSettings {

@@ -20,4 +20,10 @@ electron_1.contextBridge.exposeInMainWorld("electronAPI", {
     setTitleBarOverlay: (isDark) => electron_1.ipcRenderer.invoke("set-title-bar-overlay", isDark),
     // Notifications
     showNotification: (title, body) => electron_1.ipcRenderer.invoke("show-notification", title, body),
+    // Background image
+    pickImage: () => electron_1.ipcRenderer.invoke("pick-image"),
+    getImageDataUrl: (filePath) => electron_1.ipcRenderer.invoke("get-image-data-url", filePath),
+    // Window transparency effect
+    setWindowEffect: (enabled) => electron_1.ipcRenderer.invoke("set-window-effect", enabled),
+    getPlatform: () => electron_1.ipcRenderer.invoke("get-platform"),
 });

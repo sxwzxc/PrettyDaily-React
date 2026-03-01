@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useAppStore } from "./data/store"
 import { t } from "./data/i18n"
 import type { TabId } from "./components/LiquidBottomTabs"
@@ -138,6 +138,36 @@ export function App() {
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
 function AppShell({ children }: { children: React.ReactNode }) {
+  const { state } = useAppStore()
+  const { backgroundImagePath, backgroundImageOpacity, windowTransparency, windowTransparencyOverlay } =
+    state.settings
+
+  const [bgDataUrl, setBgDataUrl] = useState<string | null>(null)
+
+  // Load background image as base64 data URL via IPC
+  useEffect(() => {
+    const api = (window as any).electronAPI
+    if (!backgroundImagePath || !api) {
+      setBgDataUrl(null)
+      return
+    }
+    api.getImageDataUrl(backgroundImagePath).then((url: string | null) => {
+      setBgDataUrl(url)
+    })
+  }, [backgroundImagePath])
+
+  // Apply / remove native window transparency effect
+  useEffect(() => {
+    const api = (window as any).electronAPI
+    if (!api) return
+    // Enable native effect only when transparency is on AND no image is set
+    const enable = windowTransparency && !backgroundImagePath
+    api.setWindowEffect(enable)
+  }, [windowTransparency, backgroundImagePath])
+
+  const hasImage = !!bgDataUrl
+  const useTransparency = windowTransparency && !hasImage
+
   return (
     <div
       style={{
@@ -145,38 +175,77 @@ function AppShell({ children }: { children: React.ReactNode }) {
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        background: "linear-gradient(135deg, #0a0a14 0%, #0d0d1a 50%, #0a0f1a 100%)",
+        background:
+          hasImage || useTransparency
+            ? "transparent"
+            : "linear-gradient(135deg, #0a0a14 0%, #0d0d1a 50%, #0a0f1a 100%)",
         fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
         color: "rgba(255,255,255,0.9)",
         overflow: "hidden",
         position: "relative",
       }}
     >
-      {/* Ambient background blobs */}
-      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+      {/* Background image layer */}
+      {hasImage && (
         <div
           style={{
-            position: "absolute",
-            width: 500,
-            height: 500,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(0,100,255,0.06) 0%, transparent 70%)",
-            top: "-100px",
-            left: "-100px",
+            position: "fixed",
+            inset: 0,
+            zIndex: 0,
+            backgroundImage: `url(${bgDataUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            opacity: backgroundImageOpacity,
+            pointerEvents: "none",
           }}
         />
+      )}
+
+      {/* Dark scrim overlay (image mode or transparency mode) */}
+      {(hasImage || useTransparency) && (
         <div
           style={{
-            position: "absolute",
-            width: 400,
-            height: 400,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(120,0,255,0.05) 0%, transparent 70%)",
-            bottom: "0",
-            right: "0",
+            position: "fixed",
+            inset: 0,
+            zIndex: 0,
+            background: `rgba(0,0,0,${
+              hasImage
+                ? Math.min(0.7, (1 - backgroundImageOpacity) * 0.8)
+                : windowTransparencyOverlay
+            })`,
+            pointerEvents: "none",
           }}
         />
-      </div>
+      )}
+
+      {/* Ambient background blobs (default gradient mode only) */}
+      {!hasImage && !useTransparency && (
+        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+          <div
+            style={{
+              position: "absolute",
+              width: 500,
+              height: 500,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(0,100,255,0.06) 0%, transparent 70%)",
+              top: "-100px",
+              left: "-100px",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              width: 400,
+              height: 400,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(120,0,255,0.05) 0%, transparent 70%)",
+              bottom: "0",
+              right: "0",
+            }}
+          />
+        </div>
+      )}
+
       <div
         style={{
           position: "relative",

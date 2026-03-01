@@ -1,11 +1,11 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useAppStore } from "../data/store"
 import { t } from "../data/i18n"
 import type { AppSettings } from "../data/settings"
 import { DEFAULT_SETTINGS } from "../data/settings"
 import { GlassCard, GlassToggle, GlassSlider, GlassInput, GlassButton } from "../components/GlassUI"
 
-type SettingsPage = "main" | "glass" | "general" | "data" | "account" | "about"
+type SettingsPage = "main" | "glass" | "general" | "data" | "account" | "about" | "appearance"
 
 export function SettingsScreen() {
   const { state, updateSettings, login, logout, updateServerUrl, setSyncEnabled, pushToCloud, pullFromCloud, exportData, importData } = useAppStore()
@@ -16,6 +16,7 @@ export function SettingsScreen() {
 
   if (page === "glass") return <GlassEffectPage settings={settings} update={updateSettings} lang={lang} onBack={() => setPage("main")} />
   if (page === "general") return <GeneralPage settings={settings} update={updateSettings} lang={lang} onBack={() => setPage("main")} />
+  if (page === "appearance") return <AppearancePage settings={settings} update={updateSettings} lang={lang} onBack={() => setPage("main")} />
   if (page === "data") return <DataPage exportData={exportData} importData={importData} lang={lang} onBack={() => setPage("main")} />
   if (page === "account") return <AccountPage settings={settings} account={account} isSyncing={isSyncing} lastSyncError={lastSyncError} login={login} logout={logout} updateServerUrl={updateServerUrl} setSyncEnabled={setSyncEnabled} pushToCloud={pushToCloud} pullFromCloud={pullFromCloud} lang={lang} onBack={() => setPage("main")} />
   if (page === "about") return <AboutPage lang={lang} onBack={() => setPage("main")} />
@@ -28,7 +29,8 @@ export function SettingsScreen() {
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <SettingItem icon="✨" title={t("settings.glass_effect", lang)} desc={t("settings.glass_effect_desc", lang)} onClick={() => setPage("glass")} />
         <SettingItem icon="⚙️" title={t("settings.general", lang)} desc={t("settings.general_desc", lang)} onClick={() => setPage("general")} />
-        <SettingItem icon="📁" title={t("settings.data", lang)} desc={t("settings.data_desc", lang)} onClick={() => setPage("data")} />
+        <SettingItem icon="�️" title={t("settings.appearance", lang)} desc={t("settings.appearance_desc", lang)} onClick={() => setPage("appearance")} />
+        <SettingItem icon="�📁" title={t("settings.data", lang)} desc={t("settings.data_desc", lang)} onClick={() => setPage("data")} />
         <SettingItem icon="☁️" title={t("settings.account", lang)} desc={t("settings.account_desc", lang)} onClick={() => setPage("account")} />
         <SettingItem icon="ℹ️" title={t("settings.about", lang)} desc={t("settings.about_desc", lang)} onClick={() => setPage("about")} />
       </div>
@@ -406,6 +408,150 @@ function AboutPage({ lang, onBack }: { lang: "zh" | "en"; onBack: () => void }) 
           {lang === "zh" ? "漂亮的液态玻璃日常日程应用" : "A beautiful daily schedule app with Liquid Glass effects"}
         </p>
       </GlassCard>
+    </div>
+  )
+}
+
+// ─── Appearance page (Background & Window) ────────────────────────────────────
+function AppearancePage({ settings, update, lang, onBack }: { settings: AppSettings; update: (s: Partial<AppSettings>) => void; lang: "zh" | "en"; onBack: () => void }) {
+  const [platform, setPlatform] = useState<string>("")
+
+  useEffect(() => {
+    const api = (window as any).electronAPI
+    if (api) api.getPlatform().then(setPlatform)
+  }, [])
+
+  const handlePickImage = async () => {
+    const api = (window as any).electronAPI
+    if (!api) return
+    const path = await api.pickImage()
+    if (path) update({ backgroundImagePath: path })
+  }
+
+  const handleClearImage = () => {
+    update({ backgroundImagePath: "" })
+  }
+
+  // Platform tip for transparency
+  let platformTip = ""
+  if (platform === "win32") platformTip = t("settings.window_effect_win", lang)
+  else if (platform === "darwin") platformTip = t("settings.window_effect_mac", lang)
+  else if (platform) platformTip = t("settings.window_effect_other", lang)
+
+  return (
+    <div style={{ height: "100vh", overflowY: "auto", padding: "24px 16px 48px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+        <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.6)", fontSize: 20, padding: "4px 8px 4px 0" }}>
+          {t("settings.back", lang)}
+        </button>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "rgba(255,255,255,0.95)" }}>{t("settings.appearance", lang)}</h1>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {/* ── Background Image section ── */}
+        <p style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.06em", paddingLeft: 4 }}>
+          {t("settings.bg_image", lang).toUpperCase()}
+        </p>
+
+        {/* Current image preview / placeholder */}
+        <GlassCard style={{ padding: 16 }}>
+          {settings.backgroundImagePath ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div
+                style={{
+                  width: 64,
+                  height: 48,
+                  borderRadius: 8,
+                  background: "rgba(255,255,255,0.08)",
+                  overflow: "hidden",
+                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 24,
+                }}
+              >
+                🖼️
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.8)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {settings.backgroundImagePath.split(/[\\/]/).pop()}
+                </p>
+                <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {settings.backgroundImagePath}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", textAlign: "center", padding: "8px 0" }}>
+              {t("settings.bg_no_image", lang)}
+            </p>
+          )}
+        </GlassCard>
+
+        {/* Pick / Clear buttons */}
+        <div style={{ display: "flex", gap: 8 }}>
+          <GlassButton onClick={handlePickImage} style={{ flex: 1 }}>
+            {t("settings.bg_pick", lang)}
+          </GlassButton>
+          {settings.backgroundImagePath && (
+            <GlassButton variant="ghost" onClick={handleClearImage} style={{ flex: 1 }}>
+              {t("settings.bg_clear", lang)}
+            </GlassButton>
+          )}
+        </div>
+
+        {/* Opacity slider — only shown when image is set */}
+        {settings.backgroundImagePath && (
+          <GlassCard style={{ padding: 16 }}>
+            <GlassSlider
+              label={t("settings.bg_opacity", lang)}
+              value={settings.backgroundImageOpacity}
+              min={0.1}
+              max={1}
+              step={0.05}
+              displayValue={`${Math.round(settings.backgroundImageOpacity * 100)}%`}
+              onChange={(v) => update({ backgroundImageOpacity: v })}
+            />
+          </GlassCard>
+        )}
+
+        {/* ── Window Transparency section ── */}
+        <p style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.06em", paddingLeft: 4, marginTop: 8 }}>
+          {t("settings.window_effect", lang).toUpperCase()}
+        </p>
+
+        <GlassCard style={{ padding: 16 }}>
+          <ToggleRow
+            label={t("settings.window_effect", lang)}
+            desc={t("settings.window_effect_desc", lang)}
+            checked={settings.windowTransparency}
+            onChange={(v) => update({ windowTransparency: v })}
+          />
+        </GlassCard>
+
+        {/* Platform tip */}
+        {platformTip && (
+          <GlassCard style={{ padding: 12, background: "rgba(0,136,255,0.08)", borderColor: "rgba(0,136,255,0.2)" }}>
+            <p style={{ fontSize: 12, color: "rgba(0,180,255,0.8)" }}>ℹ️ {platformTip}</p>
+          </GlassCard>
+        )}
+
+        {/* Overlay darkness slider — only when transparency on AND no image */}
+        {settings.windowTransparency && !settings.backgroundImagePath && (
+          <GlassCard style={{ padding: 16 }}>
+            <GlassSlider
+              label={t("settings.window_overlay", lang)}
+              value={settings.windowTransparencyOverlay}
+              min={0}
+              max={0.7}
+              step={0.05}
+              displayValue={`${Math.round(settings.windowTransparencyOverlay * 100)}%`}
+              onChange={(v) => update({ windowTransparencyOverlay: v })}
+            />
+          </GlassCard>
+        )}
+      </div>
     </div>
   )
 }

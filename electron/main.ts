@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, nativeTheme, shell } from "electron"
+import { app, BrowserWindow, dialog, ipcMain, nativeTheme, shell } from "electron"
 import path from "path"
 import fs from "fs"
 
@@ -128,3 +128,49 @@ ipcMain.handle("show-notification", (_event, title: string, body: string) => {
 nativeTheme.on("updated", () => {
   mainWindow?.webContents.send("theme-changed", nativeTheme.shouldUseDarkColors ? "dark" : "light")
 })
+
+// IPC: Pick background image via native file dialog
+ipcMain.handle("pick-image", async () => {
+  if (!mainWindow) return null
+  const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+    title: "选择背景图片",
+    buttonLabel: "使用此图片",
+    filters: [{ name: "图片", extensions: ["jpg", "jpeg", "png", "gif", "webp", "bmp"] }],
+    properties: ["openFile"],
+  })
+  return canceled ? null : filePaths[0]
+})
+
+// IPC: Read image file and return as base64 data URL
+ipcMain.handle("get-image-data-url", (_event, filePath: string) => {
+  try {
+    if (!filePath || !fs.existsSync(filePath)) return null
+    const ext = filePath.split(".").pop()?.toLowerCase() ?? "jpg"
+    const mimeMap: Record<string, string> = {
+      jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png",
+      gif: "image/gif", webp: "image/webp", bmp: "image/bmp",
+    }
+    const mime = mimeMap[ext] ?? "image/jpeg"
+    const data = fs.readFileSync(filePath)
+    return `data:${mime};base64,${data.toString("base64")}`
+  } catch {
+    return null
+  }
+})
+
+// IPC: Enable/disable native window transparency (Acrylic on Win11, Vibrancy on macOS)
+ipcMain.handle("set-window-effect", (_event, enabled: boolean) => {
+  if (!mainWindow) return
+  if (process.platform === "win32") {
+    // setBackgroundMaterial available since Electron 25, requires Windows 11
+    if (typeof (mainWindow as unknown as { setBackgroundMaterial?: (m: string) => void }).setBackgroundMaterial === "function") {
+      ;(mainWindow as unknown as { setBackgroundMaterial: (m: string) => void }).setBackgroundMaterial(enabled ? "acrylic" : "none")
+    }
+  } else if (process.platform === "darwin") {
+    const vibrancyType = enabled ? "under-window" : null
+    mainWindow.setVibrancy(vibrancyType as Parameters<BrowserWindow["setVibrancy"]>[0])
+  }
+})
+
+// IPC: Return current OS platform
+ipcMain.handle("get-platform", () => process.platform)

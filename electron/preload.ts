@@ -23,4 +23,16 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Notifications
   showNotification: (title: string, body: string) =>
     ipcRenderer.invoke("show-notification", title, body),
+
+  // Background image
+  pickImage: (): Promise<string | null> =>
+    ipcRenderer.invoke("pick-image"),
+  getImageDataUrl: (filePath: string): Promise<string | null> =>
+    ipcRenderer.invoke("get-image-data-url", filePath),
+
+  // Window transparency effect
+  setWindowEffect: (enabled: boolean): Promise<void> =>
+    ipcRenderer.invoke("set-window-effect", enabled),
+  getPlatform: (): Promise<string> =>
+    ipcRenderer.invoke("get-platform"),
 })
