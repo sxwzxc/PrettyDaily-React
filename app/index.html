@@ -26,6 +26,13 @@
         width: 100vw;
         height: 100vh;
       }
+      /* Transparent-window mode: ensure all scroll containers pass through */
+      html[data-transparency="true"] ::-webkit-scrollbar {
+        background: transparent;
+      }
+      html[data-transparency="true"] ::-webkit-scrollbar-corner {
+        background: transparent;
+      }
     </style>
   </head>
   <body>

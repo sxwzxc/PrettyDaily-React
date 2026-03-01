@@ -141,10 +141,11 @@ export function CalendarScreen({ onEditSchedule, onAddScheduleForDay }: Calendar
       <GlassCard style={{ padding: "8px 4px", flex: "none" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 1 }}>
           {calendarDays.map((day, idx) => {
-            if (day === null) return <div key={`e-${idx}`} style={{ height: 52 }} />
+            if (day === null) return <div key={`e-${idx}`} style={{ minHeight: 72 }} />
             const events = eventsOnDay(day)
-            const dotColors = events.slice(0, 3).map((e) => argbToHex(e.colorArgb))
-            const hasRecurring = events.some((e) => e.recurrenceRule)
+            const MAX_VISIBLE = 2
+            const visibleEvents = events.slice(0, MAX_VISIBLE)
+            const extraCount = events.length - MAX_VISIBLE
             const todayCell = isToday(day)
 
             return (
@@ -154,34 +155,78 @@ export function CalendarScreen({ onEditSchedule, onAddScheduleForDay }: Calendar
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  alignItems: "center",
+                  alignItems: "flex-start",
                   justifyContent: "flex-start",
-                  padding: "5px 2px 4px",
+                  padding: "4px 3px 3px",
                   borderRadius: 10,
                   background: todayCell ? "rgba(0,136,255,0.18)" : "transparent",
                   border: todayCell ? "1px solid rgba(0,136,255,0.38)" : "1px solid transparent",
                   cursor: "pointer",
-                  minHeight: 52,
+                  minHeight: 72,
                   minWidth: 0,
-                  gap: 3,
+                  gap: 2,
                 }}
               >
-                <span style={{ fontSize: 14, fontWeight: todayCell ? 700 : 400, color: todayCell ? "#4db8ff" : "rgba(255,255,255,0.82)", lineHeight: 1.3 }}>
+                <span
+                  style={{
+                    fontSize: 13,
+                    fontWeight: todayCell ? 700 : 400,
+                    color: todayCell ? "#4db8ff" : "rgba(255,255,255,0.82)",
+                    lineHeight: 1.3,
+                    alignSelf: "center",
+                    width: "100%",
+                    textAlign: "center",
+                  }}
+                >
                   {day}
                 </span>
-                {dotColors.length > 0 && (
-                  <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
-                    {dotColors.map((c, i) => (
-                      <span key={i} style={{ width: 5, height: 5, borderRadius: "50%", background: c, display: "block" }} />
-                    ))}
-                    {events.length > 3 && (
-                      <span style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", lineHeight: 1 }}>+{events.length - 3}</span>
-                    )}
-                  </div>
-                )}
-                {hasRecurring && dotColors.length === 0 && (
-                  <span style={{ fontSize: 9, color: "rgba(255,255,255,0.3)" }}>↻</span>
-                )}
+                <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 1 }}>
+                  {visibleEvents.map((e) => {
+                    const color = argbToHex(e.colorArgb)
+                    return (
+                      <div
+                        key={e.id}
+                        style={{
+                          width: "100%",
+                          padding: "1px 2px 1px 4px",
+                          borderRadius: 3,
+                          background: color + "33",
+                          borderLeft: `2px solid ${color}`,
+                          overflow: "hidden",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 9,
+                            color: e.isCompleted ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.85)",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            textDecoration: e.isCompleted ? "line-through" : "none",
+                            lineHeight: 1.5,
+                            flex: 1,
+                          }}
+                        >
+                          {e.title}
+                        </span>
+                      </div>
+                    )
+                  })}
+                  {extraCount > 0 && (
+                    <span
+                      style={{
+                        fontSize: 9,
+                        color: "rgba(255,255,255,0.4)",
+                        paddingLeft: 3,
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      +{extraCount}
+                    </span>
+                  )}
+                </div>
               </button>
             )
           })}
@@ -274,34 +319,66 @@ function DayDetailDialog({ dateStr, events, lang, onClose, onAdd, onEdit, onTogg
   onClose: () => void, onAdd: () => void,
   onEdit: (id: number) => void, onToggle: (item: ScheduleItem) => void
 }) {
+  let pendingCount = 0
+  let doneCount = 0
+  for (const e of events) {
+    if (e.isCompleted) doneCount++
+    else pendingCount++
+  }
+
   return (
     <div
-      style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)" }}
+      style={{ position: "fixed", inset: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.55)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div style={{
         width: "min(480px, 92vw)",
-        maxHeight: "70vh",
-        background: "rgba(18,18,28,0.92)",
-        border: "1px solid rgba(255,255,255,0.1)",
+        maxHeight: "72vh",
+        background: "rgba(16,16,26,0.88)",
+        border: "1px solid rgba(255,255,255,0.12)",
         borderRadius: 24,
-        boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
+        boxShadow: "0 28px 72px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.08)",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
       }}>
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 14px" }}>
-          <span style={{ fontSize: 16, fontWeight: 700, color: "rgba(255,255,255,0.9)" }}>{dateStr}</span>
-          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-            <button onClick={onAdd} style={{ background: "none", border: "none", cursor: "pointer", color: "#0088ff", fontSize: 24, fontWeight: 700, padding: 0, lineHeight: 1 }}>+</button>
-            <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.45)", fontSize: 18, padding: 0, lineHeight: 1 }}>✕</button>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px 14px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+          <div>
+            <span style={{ fontSize: 17, fontWeight: 700, color: "rgba(255,255,255,0.95)", display: "block" }}>{dateStr}</span>
+            {events.length > 0 && (
+              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.38)", marginTop: 2, display: "block" }}>
+                {t("calendar.day_summary", lang)
+                  .replace("{pending}", String(pendingCount))
+                  .replace("{done}", String(doneCount))}
+              </span>
+            )}
+          </div>
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <button
+              onClick={onAdd}
+              style={{
+                background: "rgba(0,136,255,0.2)",
+                border: "1px solid rgba(0,136,255,0.4)",
+                borderRadius: 10,
+                padding: "6px 14px",
+                color: "#4db8ff",
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              {t("calendar.add_short", lang)}
+            </button>
+            <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.4)", fontSize: 18, padding: "4px 4px", lineHeight: 1 }}>✕</button>
           </div>
         </div>
         {/* Event list */}
-        <div style={{ overflowY: "auto", padding: "0 14px 18px", display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ overflowY: "auto", padding: "10px 14px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
           {events.length === 0 ? (
-            <p style={{ textAlign: "center", color: "rgba(255,255,255,0.35)", fontSize: 14, padding: "24px 0" }}>
+            <p style={{ textAlign: "center", color: "rgba(255,255,255,0.35)", fontSize: 14, padding: "28px 0" }}>
               {t("calendar.no_events", lang)}
             </p>
           ) : (

@@ -41,7 +41,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   backgroundImagePath: "",
   backgroundImageOpacity: 0.85,
   windowTransparency: false,
-  windowTransparencyOverlay: 0.35,
+  windowTransparencyOverlay: 0.15,
 }
 
 export interface AccountSettings {
